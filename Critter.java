@@ -7,7 +7,6 @@ public class Critter extends Organic {
 	private int view  = 10;
 	
 	public Critter(int x, int y) {
-		setHealth(5);
 		setFood(false);
 		this.x = x;
 		this.y = y;
@@ -15,12 +14,12 @@ public class Critter extends Organic {
 	
 	public Critter(int x, int y, int health) {
 		this(x, y);
-		setHealth(health);
+		setHealth(ThreadLocalRandom.current().nextInt(health - 4, health + 5));
 	}
 	
 	public Critter(int x, int y, int health, int view) {
 		this(x, y, health);
-		setView(view);
+		setView(ThreadLocalRandom.current().nextInt(view - 4, view + 5));
 	}
 	
 	public Critter(int x, int y, String healthStr, String viewStr, int health, int view) {
@@ -45,6 +44,7 @@ public class Critter extends Organic {
 		decrementHealth(1);
 		if (this.getHealth() <= 0) {
 			this.setDecay(true);
+			App.starved.add(this);
 			return;
 		}
 		Organic food = App.findClosestFood(x,y);
