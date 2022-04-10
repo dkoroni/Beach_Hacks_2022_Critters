@@ -25,11 +25,11 @@ public class Critter extends Organic {
 	
 	public Critter(int x, int y, String healthStr, String viewStr, int health, int view) {
 		if (healthStr.equals("y"))
-			setHealth(ThreadLocalRandom.current().nextInt(5, health + 1));
+			setHealth(ThreadLocalRandom.current().nextInt(10, health + 1));
 		else
 			setHealth(health);
 		if (viewStr.equals("y"))
-			setView(ThreadLocalRandom.current().nextInt(5, view + 1));
+			setView(ThreadLocalRandom.current().nextInt(10, view + 1));
 		else
 			setView(view);
 		this.x = x;

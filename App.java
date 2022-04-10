@@ -46,7 +46,7 @@ public class App {
 			critterHealth = input.nextInt();
 		}
 		else {
-			System.out.println("What should be the maximum possible health? (min 5)");
+			System.out.println("What should be the maximum possible health? (min 10)");
 			critterHealth = input.nextInt();
 		}
 		
@@ -63,7 +63,7 @@ public class App {
 			critterView = input.nextInt();
 		}
 		else {
-			System.out.println("What should be the maximum possible view distance? (min 5)");
+			System.out.println("What should be the maximum possible view distance? (min 10)");
 			critterView = input.nextInt();
 		}
 		
