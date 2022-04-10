@@ -1,6 +1,7 @@
 package Beach_Hacks_2022_Critters;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -19,6 +20,8 @@ public class App {
 	public static ArrayList<Food> foods = new ArrayList<>();
 	public static ArrayList<Organic> starved = new ArrayList<>();
 	public static char field[][] = new char[maxX][maxY];
+	public static int healthGenes[] = new int[5];
+	public static int viewGenes[] = new int[5];
 	public static boolean fullness;
 	
 	
@@ -90,8 +93,8 @@ public class App {
 		System.out.println("How long should the critters search for food?");
 		int time = input.nextInt();
 		
-		System.out.println("Should fullness be taken into account? A full animal will not search for food unless it has less than half health (y/n)");
-		String fullnessStr = input.nextLine();
+		String fullnessStr;
+		System.out.println("Should fullness be taken into account? A full animal will not search for food unless it has less than half health. (y/n)");
 		do{
 			fullnessStr = input.nextLine();
 		}
@@ -105,7 +108,6 @@ public class App {
 		System.out.println("Display field? (y/n)");
 		String fieldStr = input.nextLine();
 		
-		input.close();
 		
 		
 		for(int i = 0; i < critterAmount; i++) {
@@ -133,18 +135,49 @@ public class App {
 
 		act(time, fieldStr);
 		
+		int genesAmount = Math.min(critterAmount, 5);
+		int geneIndex = 0;
+		
 		System.out.println("Surviving critters had the following attributes:");
 		for(Organic org : organisms){
 			if (!org.isFood() && !org.isDecay()) {
 				System.out.println(org.toString());
 			}
+			if (geneIndex < genesAmount) {
+				healthGenes[geneIndex] = org.getMaxHealth();
+				viewGenes[geneIndex] = ((Critter)org).getView();
+				geneIndex++;
+			}
 		}
-		System.out.println("\n\nStarved critters had the following attributes: (in order of elimination)");
+		System.out.println("\n\nStarved critters had the following attributes: (in order of survival)");
+		Collections.reverse(starved);
 		for(Organic org : starved){
 			if (!org.isFood() && org.isDecay()) {
 				System.out.println(org.toString());
+				if (geneIndex < genesAmount) {
+					healthGenes[geneIndex] = org.getMaxHealth();
+					viewGenes[geneIndex] = ((Critter)org).getView();
+					geneIndex++;
+				}
 			}
 		}
+		
+		while(true) {
+			String generateStr;
+			System.out.println("Spawn next generation of critters? Next generation is spawned using 5 surviving or most recently starved critters. (y/n)");
+			do{
+				generateStr = input.nextLine();
+			}
+			while(!(generateStr.equals("y") || generateStr.equals("n")));
+			
+			if (generateStr.equals("y")) {
+				actNextGen(input, critterAmount, genesAmount, foodAmount, foodHealthStr, foodHealth, time, fieldStr);
+			}
+			else
+				break;
+		}
+		
+		input.close();
 	}
 	
 	/**
@@ -162,20 +195,81 @@ public class App {
 				if (!org.isDecay())
 					org.act();
 				else {
-					if (field[org.x][org.y] == 'C')
+					if (field[org.x][org.y] == 'C') {
 						field[org.x][org.y] = 'D';
+					}
 					else
 						field[org.x][org.y] = '.';	
-					starved.add(org);
 				}
 			}
 			if (foods.size() == 0)
+				break;
+			if (starved.size() == organisms.size())
 				break;
 			if(fieldStr.equals("y"))
 				Thread.sleep(1000);
 			time--;
 		}
 		printCharArray();
+	}
+	
+	public static void actNextGen(Scanner input, int critterAmount, int genesAmount, int foodAmount, String foodHealthStr, int foodHealth, int time, String fieldStr) throws InterruptedException {
+		int geneIndex = 0;
+		organisms.clear();
+		foods.clear();
+		starved.clear();
+		for (int i = 0; i < field.length; i++)
+			for(int j = 0; j < field[0].length; j++)
+				field[i][j] = '.';
+		
+		for(int i = 0; i < critterAmount; i++) {
+			organisms.add(new Critter(ThreadLocalRandom.current().nextInt(0, maxX),ThreadLocalRandom.current().nextInt(0, maxY), healthGenes[geneIndex%genesAmount], viewGenes[geneIndex%genesAmount]));
+			geneIndex ++;
+		}
+		
+		for(int i = 0; i < foodAmount; i++) {
+			int x = ThreadLocalRandom.current().nextInt(0, maxX);
+			int y = ThreadLocalRandom.current().nextInt(0, maxY);
+			while (field[x][y] != '.') {
+				x = ThreadLocalRandom.current().nextInt(0, maxX);
+				y = ThreadLocalRandom.current().nextInt(0, maxY);
+			}
+			Food tasty = new Food(x, y);
+			if (foodHealthStr.equals("y"))
+				tasty.setHealth(ThreadLocalRandom.current().nextInt(5, foodHealth + 1));
+			else
+				tasty.setHealth(foodHealth);
+			organisms.add(tasty);
+			foods.add(tasty);
+		}
+		
+		populateField(organisms, field);
+
+		act(time, fieldStr);
+		geneIndex = 0;
+		System.out.println("Surviving critters had the following attributes:");
+		for(Organic org : organisms){
+			if (!org.isFood() && !org.isDecay()) {
+				System.out.println(org.toString());
+			}
+			if (geneIndex < genesAmount) {
+				healthGenes[geneIndex] = org.getMaxHealth();
+				viewGenes[geneIndex] = ((Critter)org).getView();
+				geneIndex++;
+			}
+		}
+		System.out.println("\n\nStarved critters had the following attributes: (in order of survival)");
+		Collections.reverse(starved);
+		for(Organic org : starved){
+			if (!org.isFood() && org.isDecay()) {
+				System.out.println(org.toString());
+				if (geneIndex < genesAmount) {
+					healthGenes[geneIndex] = org.getMaxHealth();
+					viewGenes[geneIndex] = ((Critter)org).getView();
+					geneIndex++;
+				}
+			}
+		}
 	}
 	
 	/**
