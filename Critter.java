@@ -19,7 +19,7 @@ public class Critter extends Organic {
 	
 	public Critter(int x, int y, int health, int view) {
 		this(x, y, health);
-		setView(ThreadLocalRandom.current().nextInt(view - 3, view + 4));
+		setView(ThreadLocalRandom.current().nextInt(view - 1, view + 2));
 	}
 	
 	public Critter(int x, int y, String healthStr, String viewStr, int health, int view) {
