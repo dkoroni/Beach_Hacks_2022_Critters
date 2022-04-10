@@ -14,12 +14,12 @@ public class Critter extends Organic {
 	
 	public Critter(int x, int y, int health) {
 		this(x, y);
-		setHealth(ThreadLocalRandom.current().nextInt(health - 3, health + 4));
+		setHealth(ThreadLocalRandom.current().nextInt(health - 1, health + 2));
 	}
 	
 	public Critter(int x, int y, int health, int view) {
 		this(x, y, health);
-		setView(ThreadLocalRandom.current().nextInt(view - 1, view + 2));
+		setView(ThreadLocalRandom.current().nextInt(Math.max(1, view - 3), view + 4));
 	}
 	
 	public Critter(int x, int y, String healthStr, String viewStr, int health, int view) {
@@ -28,7 +28,7 @@ public class Critter extends Organic {
 		else
 			setHealth(health);
 		if (viewStr.equals("y"))
-			setView(ThreadLocalRandom.current().nextInt(10, view + 1));
+			setView(ThreadLocalRandom.current().nextInt(4, view + 1));
 		else
 			setView(view);
 		this.x = x;
@@ -78,13 +78,18 @@ public class Critter extends Organic {
 			}
 		}
 		
-		App.updateCritterPosition(x, y, updatedX, updatedY);
-		x = updatedX;
-		y = updatedY;
+		
+		boolean canMove = App.validateCritterPosition(updatedX, updatedY);
+		if(canMove) {
+			App.updateCritterPosition(x, y, updatedX, updatedY);
+			x = updatedX;
+			y = updatedY;
+		}
 		decrementHealth(1);
 		if (this.getHealth() <= 0) {
 			this.setDecay(true);
 			App.starved.add(this);
+			App.field[x][y] = 'D';
 			return;
 		}
 	}
