@@ -336,9 +336,9 @@ public class App {
 		int count = 0;
 		for (int val : healthGenes) {
 			sum += val;
-			count++;
 			if (val == 0)
 				break;
+			count++;
 		}
 		return (sum/count);
 	}
@@ -353,9 +353,9 @@ public class App {
 		int count = 0;
 		for (int val : viewGenes) {
 			sum += val;
-			count++;
 			if (val == 0)
 				break;
+			count++;
 		}
 		return (sum/count);
 	}
