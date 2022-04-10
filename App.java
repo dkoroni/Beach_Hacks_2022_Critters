@@ -19,6 +19,8 @@ public class App {
 	public static ArrayList<Organic> organisms = new ArrayList<>();
 	public static ArrayList<Food> foods = new ArrayList<>();
 	public static ArrayList<Organic> starved = new ArrayList<>();
+	public static ArrayList<Integer> healthHistory = new ArrayList<>();
+	public static ArrayList<Integer> viewHistory = new ArrayList<>();
 	public static char field[][] = new char[maxX][maxY];
 	public static int healthGenes[] = new int[5];
 	public static int viewGenes[] = new int[5];
@@ -162,6 +164,9 @@ public class App {
 			}
 		}
 		
+		healthHistory.add(averageHealth());
+		viewHistory.add(averageView());
+		
 		while(true) {
 			String generateStr;
 			System.out.println("Spawn next generation of critters? Next generation is spawned using 5 surviving or most recently starved critters. (y/n)");
@@ -175,6 +180,11 @@ public class App {
 			}
 			else
 				break;
+		}
+		
+		System.out.println("Here is the average health and view distance of each inherited generation:");
+		for (int i = 0; i < healthHistory.size(); i ++) {
+			System.out.println("\tGeneration " + i + ": \t\tHealth: " + healthHistory.get(i) + "\tView distance: " + viewHistory.get(i));
 		}
 		
 		input.close();
@@ -251,11 +261,11 @@ public class App {
 		for(Organic org : organisms){
 			if (!org.isFood() && !org.isDecay()) {
 				System.out.println(org.toString());
-			}
-			if (geneIndex < genesAmount) {
-				healthGenes[geneIndex] = org.getMaxHealth();
-				viewGenes[geneIndex] = ((Critter)org).getView();
-				geneIndex++;
+				if (geneIndex < genesAmount) {
+					healthGenes[geneIndex] = org.getMaxHealth();
+					viewGenes[geneIndex] = ((Critter)org).getView();
+					geneIndex++;
+				}
 			}
 		}
 		System.out.println("\n\nStarved critters had the following attributes: (in order of survival)");
@@ -270,6 +280,32 @@ public class App {
 				}
 			}
 		}
+		healthHistory.add(averageHealth());
+		viewHistory.add(averageView());
+	}
+	
+	public static int averageHealth() {
+		int sum = 0;
+		int count = 0;
+		for (int val : healthGenes) {
+			sum += val;
+			count++;
+			if (val == 0)
+				break;
+		}
+		return (sum/count);
+	}
+	
+	public static int averageView() {
+		int sum = 0;
+		int count = 0;
+		for (int val : viewGenes) {
+			sum += val;
+			count++;
+			if (val == 0)
+				break;
+		}
+		return (sum/count);
 	}
 	
 	/**
