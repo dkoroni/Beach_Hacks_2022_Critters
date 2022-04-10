@@ -17,7 +17,10 @@ public class App {
 	
 	public static ArrayList<Organic> organisms = new ArrayList<>();
 	public static ArrayList<Food> foods = new ArrayList<>();
+	public static ArrayList<Organic> starved = new ArrayList<>();
 	public static char field[][] = new char[maxX][maxY];
+	public static boolean fullness;
+	
 	
 	public static void main(String[] args) throws InterruptedException {
 		for (int i = 0; i < field.length; i++)
@@ -87,6 +90,21 @@ public class App {
 		System.out.println("How long should the critters search for food?");
 		int time = input.nextInt();
 		
+		System.out.println("Should fullness be taken into account? A full animal will not search for food unless it has less than half health (y/n)");
+		String fullnessStr = input.nextLine();
+		do{
+			fullnessStr = input.nextLine();
+		}
+		while(!(fullnessStr.equals("y") || fullnessStr.equals("n")));
+		
+		if (fullnessStr.equals("y"))
+			fullness = true;
+		else
+			fullness = false;
+		
+		System.out.println("Display field? (y/n)");
+		String fieldStr = input.nextLine();
+		
 		input.close();
 		
 		
@@ -112,9 +130,34 @@ public class App {
 		
 		
 		populateField(organisms, field);
-		ArrayList<Organic> starved = new ArrayList<>();
+
+		act(time, fieldStr);
+		
+		System.out.println("Surviving critters had the following attributes:");
+		for(Organic org : organisms){
+			if (!org.isFood() && !org.isDecay()) {
+				System.out.println(org.toString());
+			}
+		}
+		System.out.println("\n\nStarved critters had the following attributes: (in order of elimination)");
+		for(Organic org : starved){
+			if (!org.isFood() && org.isDecay()) {
+				System.out.println(org.toString());
+			}
+		}
+	}
+	
+	/**
+	 * performs the field process with critters and food, calling each object with their act() procedure
+	 * 
+	 * @param time	how many loops should the field run for. terminates when there is no food regardless
+	 * @param fieldStr	should the field be displayed. only "y" or "n"
+	 * @throws InterruptedException	exception should never be thrown, thread is only used to sleep for display purposes
+	 */
+	public static void act(int time, String fieldStr) throws InterruptedException {
 		while(time >= 0) {
-			printCharArray();
+			if (fieldStr.equals("y"))
+					printCharArray();
 			for (Organic org : organisms) {
 				if (!org.isDecay())
 					org.act();
@@ -128,22 +171,11 @@ public class App {
 			}
 			if (foods.size() == 0)
 				break;
-			Thread.sleep(1000);
+			if(fieldStr.equals("y"))
+				Thread.sleep(1000);
 			time--;
 		}
 		printCharArray();
-		System.out.println("Surviving critters had the following attributes:");
-		for(Organic org : organisms){
-			if (!org.isFood() && !org.isDecay()) {
-				System.out.println(org.toString());
-			}
-		}
-		System.out.println("\n\nStarved critters had the following attributes: (in order of elimination)");
-		for(Organic org : starved){
-			if (!org.isFood() && org.isDecay()) {
-				System.out.println(org.toString());
-			}
-		}
 	}
 	
 	/**

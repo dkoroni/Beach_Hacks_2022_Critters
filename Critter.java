@@ -58,7 +58,7 @@ public class Critter extends Organic {
 			xDir = view;
 			yDir = view;
 		}
-		if (Math.hypot(xDir, yDir) > view) {
+		if ((App.fullness && getMaxHealth()/getHealth() <= 2) || Math.hypot(xDir, yDir) > view) {
 			xDir = ThreadLocalRandom.current().nextInt(-1, 1 + 1);
 			yDir = ThreadLocalRandom.current().nextInt(-1, 1 + 1);
 			while (xDir == 0 && yDir == 0) { 
