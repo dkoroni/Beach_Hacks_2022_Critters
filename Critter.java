@@ -41,12 +41,6 @@ public class Critter extends Organic {
 	
 	@Override
 	public void act() {
-		decrementHealth(1);
-		if (this.getHealth() <= 0) {
-			this.setDecay(true);
-			App.starved.add(this);
-			return;
-		}
 		Organic food = App.findClosestFood(x,y);
 		int xDir;
 		int yDir;
@@ -58,12 +52,13 @@ public class Critter extends Organic {
 			xDir = view;
 			yDir = view;
 		}
-		if ((App.fullness && getMaxHealth()/getHealth() <= 2) || Math.hypot(xDir, yDir) > view) {
-			xDir = ThreadLocalRandom.current().nextInt(-1, 1 + 1);
-			yDir = ThreadLocalRandom.current().nextInt(-1, 1 + 1);
+		if (Math.hypot(xDir, yDir) > view ||(App.fullness && getMaxHealth()/getHealth() <= 2) || food == null) {
+			
+			xDir = ThreadLocalRandom.current().nextInt(-1, 2);
+			yDir = ThreadLocalRandom.current().nextInt(-1, 2);
 			while (xDir == 0 && yDir == 0) { 
-				xDir = ThreadLocalRandom.current().nextInt(-1, 1 + 1);
-				yDir = ThreadLocalRandom.current().nextInt(-1, 1 + 1);
+				xDir = ThreadLocalRandom.current().nextInt(-1, 2);
+				yDir = ThreadLocalRandom.current().nextInt(-1, 2);
 			}
 		}
 		else {			
@@ -75,7 +70,7 @@ public class Critter extends Organic {
 		int updatedX = (((x + xDir)%App.maxX) + App.maxX) % App.maxX;
 		int updatedY = (((y + yDir)%App.maxY) + App.maxY) % App.maxY;
 		
-		if (food!=null) {
+		if (food!= null) {
 			if (updatedX == food.x && updatedY == food.y) {
 				incrementHealth(food.getHealth());
 				if (getHealth() > getMaxHealth())
@@ -86,6 +81,12 @@ public class Critter extends Organic {
 		App.updateCritterPosition(x, y, updatedX, updatedY);
 		x = updatedX;
 		y = updatedY;
+		decrementHealth(1);
+		if (this.getHealth() <= 0) {
+			this.setDecay(true);
+			App.starved.add(this);
+			return;
+		}
 	}
 	
 	@Override
