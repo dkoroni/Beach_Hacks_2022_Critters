@@ -28,11 +28,14 @@ public class App {
 	
 	
 	public static void main(String[] args) throws InterruptedException {
+		
+		//instantiate the field with commas
 		for (int i = 0; i < field.length; i++)
 			for(int j = 0; j < field[0].length; j++)
 				field[i][j] = '.';
 		
 		
+		//ask questions for user input
 		Scanner input = new Scanner(System.in);
 		
 		System.out.println("How many critters would you like to add?");
@@ -68,11 +71,11 @@ public class App {
 			critterView = input.nextInt();
 		}
 		else {
-			System.out.println("What should be the maximum possible view distance? (min 10)");
+			System.out.println("What should be the maximum possible view distance? (min 5)");
 			critterView = input.nextInt();
 		}
 		
-		System.out.println("How much food would you like to add?");
+		System.out.println("How much food would you like to add to the initial field?");
 		int foodAmount = input.nextInt();
 		
 		String foodHealthStr;
@@ -107,11 +110,11 @@ public class App {
 		else
 			fullness = false;
 		
-		System.out.println("Display field? (y/n)");
+		System.out.println("Display each step? (y/n)");
 		String fieldStr = input.nextLine();
 		
 		
-		
+		// start populating the field based on the user's criteria, starting with critters and then food
 		for(int i = 0; i < critterAmount; i++) {
 			organisms.add(new Critter(ThreadLocalRandom.current().nextInt(0, maxX),ThreadLocalRandom.current().nextInt(0, maxY), critterHealthStr, critterViewStr, critterHealth, critterView));
 		}
@@ -132,14 +135,16 @@ public class App {
 			foods.add(tasty);
 		}
 		
-		
 		populateField(organisms, field);
-
-		act(time, fieldStr);
 		
-		int genesAmount = Math.min(critterAmount, 5);
+		// make each object on the field do something
+		act(time, fieldStr, foodAmount, foodHealthStr, foodHealth);
+		
+		//collect the gene samples :)
+		int genesAmount = Math.min(critterAmount, 4);
 		int geneIndex = 0;
 		
+		// print out the surviving critters while collecting the genes
 		System.out.println("Surviving critters had the following attributes:");
 		for(Organic org : organisms){
 			if (!org.isFood() && !org.isDecay()) {
@@ -151,6 +156,9 @@ public class App {
 				geneIndex++;
 			}
 		}
+		
+		// if there are less than the amount of genes required steal them from the dead critters
+		// since critters are added in order of death, reversing the order lets us take the most viable critters
 		System.out.println("\n\nStarved critters had the following attributes: (in order of survival)");
 		Collections.reverse(starved);
 		for(Organic org : starved){
@@ -164,12 +172,14 @@ public class App {
 			}
 		}
 		
+		// take note of the average health/view of this generation
 		healthHistory.add(averageHealth());
 		viewHistory.add(averageView());
 		
+		// infinite loop for the user to perform unlimited iterations of critters surviving
 		while(true) {
 			String generateStr;
-			System.out.println("Spawn next generation of critters? Next generation is spawned using 5 surviving or most recently starved critters. (y/n)");
+			System.out.println("Spawn next generation of critters? Next generation is spawned using 4 surviving or most recently starved critters. (y/n)");
 			do{
 				generateStr = input.nextLine();
 			}
@@ -197,7 +207,7 @@ public class App {
 	 * @param fieldStr	should the field be displayed. only "y" or "n"
 	 * @throws InterruptedException	exception should never be thrown, thread is only used to sleep for display purposes
 	 */
-	public static void act(int time, String fieldStr) throws InterruptedException {
+	public static void act(int time, String fieldStr, int foodAmount, String foodHealthStr, int foodHealth) throws InterruptedException {
 		while(time >= 0) {
 			if (fieldStr.equals("y"))
 					printCharArray();
@@ -205,16 +215,32 @@ public class App {
 				if (!org.isDecay())
 					org.act();
 				else {
-					if (field[org.x][org.y] == 'C') {
-						field[org.x][org.y] = 'D';
-					}
-					else
-						field[org.x][org.y] = '.';	
+//					if (field[org.x][org.y] == 'D' || field[org.x][org.y] == '.') {
+//						field[org.x][org.y] = '.';
+//					}
+//					else
+//						field[org.x][org.y] = 'D';	
 				}
 			}
 //			if (foods.size() == 0)
 //				break;
-			if (starved.size() == organisms.size())
+			int x = ThreadLocalRandom.current().nextInt(0, maxX);
+			int y = ThreadLocalRandom.current().nextInt(0, maxY);
+			while (field[x][y] != '.') {
+				x = ThreadLocalRandom.current().nextInt(0, maxX);
+				y = ThreadLocalRandom.current().nextInt(0, maxY);
+			}
+			field[x][y] = 'F';
+			foodAmount++;
+			Food tasty = new Food(x, y);
+			if (foodHealthStr.equals("y"))
+				tasty.setHealth(ThreadLocalRandom.current().nextInt(5, foodHealth + 1));
+			else
+				tasty.setHealth(foodHealth);
+			organisms.add(tasty);
+			foods.add(tasty);
+			
+			if (starved.size() >= (organisms.size()-foodAmount))
 				break;
 			if(fieldStr.equals("y"))
 				Thread.sleep(1000);
@@ -223,6 +249,21 @@ public class App {
 		printCharArray();
 	}
 	
+	/**
+	 * each successive generation calls this procedure to inherit the most survivable critter's traits
+	 * after inheritting the traits, the critters have to fend for themselves
+	 * 
+	 * 
+	 * @param input				scanner for input
+	 * @param critterAmount		amount of critters the user asked for
+	 * @param genesAmount		amount of genes to be collected, either 4 or less if there are less total critters
+	 * @param foodAmount		total amount of food to be spawned initially
+	 * @param foodHealthStr		whether or not there is variance in food health
+	 * @param foodHealth		amount of health each food restores
+	 * @param time				amount of steps/rounds for each field
+	 * @param fieldStr			whether or not we should show each step for the field
+	 * @throws InterruptedException	this should never be thrown, only used for sleep when displaying the field
+	 */
 	public static void actNextGen(Scanner input, int critterAmount, int genesAmount, int foodAmount, String foodHealthStr, int foodHealth, int time, String fieldStr) throws InterruptedException {
 		int geneIndex = 0;
 		organisms.clear();
@@ -255,7 +296,8 @@ public class App {
 		
 		populateField(organisms, field);
 
-		act(time, fieldStr);
+		act(time, fieldStr, foodAmount, foodHealthStr, foodHealth);
+		
 		geneIndex = 0;
 		System.out.println("Surviving critters had the following attributes:");
 		for(Organic org : organisms){
@@ -284,6 +326,11 @@ public class App {
 		viewHistory.add(averageView());
 	}
 	
+	/**
+	 * calculates the average of the current generation's health genes
+	 * 
+	 * @return int average value
+	 */
 	public static int averageHealth() {
 		int sum = 0;
 		int count = 0;
@@ -296,6 +343,11 @@ public class App {
 		return (sum/count);
 	}
 	
+	/**
+	 * calculates the average of the current generation's view genes
+	 * 
+	 * @return int average value
+	 */
 	public static int averageView() {
 		int sum = 0;
 		int count = 0;
@@ -344,6 +396,14 @@ public class App {
 		}
 	}
 
+	
+	/**
+	 * finds the closest food to the specified location but DOES NOT check past boundaries/borders
+	 * 
+	 * @param x	current horizontal location of critter
+	 * @param y	current vertical location of critter
+	 * @return nearest food to the specified location
+	 */
 	public static Organic findClosestFood(int x, int y) {
 		Food closestFood = null;
 		double closestDistance = Math.hypot(maxX, maxY);
@@ -358,6 +418,14 @@ public class App {
 		return closestFood;
 	}
 
+	/**
+	 * updates the critter's position and allocates health if a food was occupying the position 
+	 * 
+	 * @param x old horizontal pos
+	 * @param y old vertical pos
+	 * @param i new horizontal pos, checks for food
+	 * @param j new vertical pos, checks for food
+	 */
 	public static void updateCritterPosition(int x, int y, int i, int j) {
 		field[x][y] = '.';
 		if (field[i][j] == 'F') {
@@ -370,6 +438,19 @@ public class App {
 			}
 		}
 		field[i][j] = 'C';
+	}
+
+	/**
+	 * checks if the specified location is currently occupied by a critter
+	 * 
+	 * @param updatedX tentative horizontal pos
+	 * @param updatedY tentative vertical pos
+	 * @return true if there is no critter in the new spot
+	 */
+	public static boolean validateCritterPosition(int updatedX, int updatedY) {
+		if (field[updatedX][updatedY] == 'C')
+			return false;
+		return true;
 	}
 
 }
