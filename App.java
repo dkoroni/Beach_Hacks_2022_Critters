@@ -212,8 +212,8 @@ public class App {
 						field[org.x][org.y] = '.';	
 				}
 			}
-			if (foods.size() == 0)
-				break;
+//			if (foods.size() == 0)
+//				break;
 			if (starved.size() == organisms.size())
 				break;
 			if(fieldStr.equals("y"))
