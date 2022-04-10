@@ -14,12 +14,12 @@ public class Critter extends Organic {
 	
 	public Critter(int x, int y, int health) {
 		this(x, y);
-		setHealth(ThreadLocalRandom.current().nextInt(health - 2, health + 3));
+		setHealth(ThreadLocalRandom.current().nextInt(health - 3, health + 4));
 	}
 	
 	public Critter(int x, int y, int health, int view) {
 		this(x, y, health);
-		setView(ThreadLocalRandom.current().nextInt(view - 2, view + 3));
+		setView(ThreadLocalRandom.current().nextInt(view - 3, view + 4));
 	}
 	
 	public Critter(int x, int y, String healthStr, String viewStr, int health, int view) {
